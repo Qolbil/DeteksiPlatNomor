@@ -39,7 +39,7 @@ namespace ProjectPlat_Otw
         private List<int> sequenceCodeList;
         private OleDbConnection con = new OleDbConnection();
         private List<TextBox> txtBoxList;
-        private double[] bobot, bobot1, bobot2, data;
+        private double[] bobot, data;
         private int temTarget, statusTarget;
         private double alpha;
 
@@ -48,6 +48,7 @@ namespace ProjectPlat_Otw
             InitializeComponent();
 
             alpha = 0.05;
+
             resizeImg = new Bitmap(480, 360);
             resizeBlob = new Bitmap(20, 20);
             destRect = new Rectangle(0, 0, 480, 360);
@@ -60,6 +61,7 @@ namespace ProjectPlat_Otw
             sequenceCodeList = new List<int>(400);
             txtBoxList = new List<TextBox>(9);
             graphics = Graphics.FromImage(resizeImg);
+
             graphics.CompositingMode = CompositingMode.SourceCopy;
             graphics.CompositingQuality = CompositingQuality.HighQuality;
             graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
@@ -159,7 +161,7 @@ namespace ProjectPlat_Otw
             //dilasi
             img_DilasiBin = imgOtsu.Convert<Gray, byte>().Dilate(1);
             cropi = resizingBlob(img_DilasiBin.AsBitmap()); 
-            pbOtsu.Image = cropi;
+            pictOtsu.Image = cropi;
             arrayBlobs.Clear();
             txtBoxList.Clear();
             arrayBlobs.Add(string.Join("", array1D(cropi)));
@@ -211,9 +213,9 @@ namespace ProjectPlat_Otw
                     insert.CommandText = "INSERT INTO PlatTraining (Kelas, array1D) values ('" + txtBoxList[i].Text + "','" + arrayBlobs[i] + "' ) ";
                     int a = insert.ExecuteNonQuery();
                     con.Close();
-                    if (a == 0) { MessageBox.Show("gagal", "Huu", MessageBoxButtons.OK); }
+                    if (a == 0) { MessageBox.Show("gagal", "Data Gagal Disimpan", MessageBoxButtons.OK); }
                     //Not updated.
-                    else { MessageBox.Show("berhasil", "Yee", MessageBoxButtons.OK); }
+                    else { MessageBox.Show("berhasil", "Data Berhasil Disimpan", MessageBoxButtons.OK); }
                 }
                 //Updated.
                 catch (Exception ex)
@@ -221,6 +223,92 @@ namespace ProjectPlat_Otw
                     // Not updated
                 } 
             }
+        }
+
+        private void btnTraining_Click(object sender, EventArgs e)
+        {
+            con.Open();
+
+            // Ambil data training
+            string sql = "SELECT * FROM PlatTraining";
+            OleDbCommand get = new OleDbCommand(sql, con);
+            OleDbDataReader row = get.ExecuteReader();
+
+            List<string> arrayKelas = new List<string>();
+            int[][] arrayEkstraksi = new int[1000][];
+
+            // Memasukkan data ke dalam array
+            int i = 0;
+            while (row.Read())
+            {
+                arrayKelas.Add(row[1].ToString());
+
+                for (int j = 0; j < row[2].ToString().Length; j++)
+                {
+                    arrayEkstraksi[i] = new int[row[2].ToString().Length];
+                    arrayEkstraksi[i][j] = int.Parse(row[2].ToString().Substring(j, 1));
+                    Console.WriteLine("Sub string: " + arrayEkstraksi[i][j].ToString());
+                }
+                i++;
+            }
+
+            // Ambil data bobot
+            string sqli = "SELECT * FROM PlatBobot";
+            OleDbCommand get1 = new OleDbCommand(sqli, con);
+            OleDbDataReader rows = get1.ExecuteReader();
+
+            List<string> arrayKelasBobot = new List<string>();
+            double[][] arrayEkstraksiBobot = new double[1000][];
+
+            // Memasukkan data bobot ke dalam array bobot
+            int q = 0;
+            while (rows.Read())
+            {
+                arrayKelasBobot.Add(rows[1].ToString());
+                for (int j = 0; j < rows[2].ToString().Length; j++)
+                {
+                    arrayEkstraksiBobot[q] = new double[rows[2].ToString().Length];
+                    arrayEkstraksiBobot[q][j] = double.Parse(rows[2].ToString().Substring(j, 1));
+                    Console.WriteLine("Sub string: " + arrayEkstraksiBobot[q][j].ToString());
+                }
+                q++;
+            }
+
+            // Training sebanyak 10 iterasi
+            for (int p = 0; p < 10; p++)
+            {
+                // Ulangi sebanyak data ekstraksi
+                for (int k = 0; k < arrayEkstraksi.GetLength(0); k++)
+                {
+                    // Jika data ekstraksi habis, keluar dari loop
+                    if (arrayEkstraksi[k] == null) { break; }
+
+                    // Mencari karakter di arrayKelasBobot berdasarkan karakter arrayKelas[k], kemudian ambil indeks/posisi/lokasi nya
+                    int indeks = Array.IndexOf(arrayKelasBobot.ToArray(), arrayKelas[k]);
+
+                    //Mencari ekstraksi berdasarkan indeks/ posisi / lokasi
+                    bobot = new double[400];
+                    bobot = arrayEkstraksiBobot[indeks];
+
+                    // Ulangi sebanyak data ekstraksi bobot
+                    for (int m = 0; m < arrayEkstraksiBobot.GetLength(0); m++)
+                    {
+                        // Jika data ekstraksi bobot habis, keluar dari loop
+                        if (arrayEkstraksiBobot[m] == null) { break; }
+
+                        // Proses LVQ
+                        bobot = elveki(bobot, arrayEkstraksiBobot[m], arrayEkstraksi[k], alpha);
+                    }
+
+                    // Update table(bobot) values(string.Join("-", arrayEkstraksiBobot[indeks])) where kelas = arrayKelasBobot[indeks]
+                    string bbtInput = "SELECT * FROM PlatBobot where ";
+                    OleDbCommand bbInput = new OleDbCommand(bbtInput, con);
+                }
+
+                alpha = alpha - (0.1 * alpha);
+            }
+            MessageBox.Show("OK", "Training Telah Selesai", MessageBoxButtons.OK);
+            con.Close();
         }
 
         private void BlobSquare()
@@ -283,109 +371,9 @@ namespace ProjectPlat_Otw
 
         private void btnKlasifikasi_Click(object sender, EventArgs e)
         {
-            //dataGridView1.Rows.Clear();
-            //loadData();
-            //dataGridView1.Rows.Add(data.GetLength(0));
-            //for (int i = 0; i < data.GetLength(0); i++)
-            //{
-            //    dataGridView1.Auto ResizeRowHeadersWidth
-            //   (i, dataGridviewRowHeaderswidthSizeMode.AutoSizeToDisplayedHeaders);
-            //    dataGridView1.Rows[i].HeaderCell.Value = "Data ke-" + (i + 1).ToString();
-            //    dataGridView1.Rows[i].Cells[0].Value = data[i, 0].ToString();
-            //    dataGridView1.Rows[i].Cells[1].Value = data[i, 1].ToString();
-            //    dataGridView1.Rows[i].Cells[2].Value = data[i, 2].ToString();
-            //    dataGridView1.Rows[i].Cells[3].Value = data[i, 3].ToString();
-            //    dataGridView1.Rows[i].Cells[4].Value = data[i, 4].ToString();
-            //    dataGridView1.Rows[i].Cells[5].Value = data[i, 5].ToString();
-            //}
-
-            con.Open();
-            string sql = "SELECT * FROM PlatTraining";
-            OleDbCommand get = new OleDbCommand(sql, con);
-            OleDbDataReader row = get.ExecuteReader();
-
-            int[,] arrayekstraksi = new int[1000, 400];
-            List<string> arraykelas = new List<string>();
-            int[] kelas = new int[400];
-
-            string sqli = "SELECT * FROM PlatBobot";
-            OleDbCommand get1 = new OleDbCommand(sqli, con);
-            OleDbDataReader rows = get1.ExecuteReader();
-
-            // manggil bobot jagged 2d, arraybobot
-            //kodingan njupuk bobot, per karakter ambil 1 baris=baris pertama
-            int[][] bobotjagged = new int[400][];
-            List<string> kelasBB = new List<string>();
-
-            int i = 0;
-            while (row.Read())
-            {
-                arraykelas.Add(row[1].ToString());
-                
-                for (int j = 0; j < row[2].ToString().Length; j++)
-                {
-                    arrayekstraksi[i, j] = int.Parse(row[2].ToString().Substring(j, 1));
-                    Console.WriteLine("Sub string: " + arrayekstraksi[i,j].ToString());
-                }
-                i++;
-            }
-
-            int q = 0;
-            while (rows.Read())
-            {
-                kelasBB.Add(rows[1].ToString());
-
-                for (int j = 0; j < rows[2].ToString().Length; j++)
-                {
-                    bobotjagged[q][j] = int.Parse(rows[2].ToString().Substring(j, 1));
-                    Console.WriteLine("Sub string: " + bobotjagged[i][j].ToString());
-                }
-                q++;
-            }
-
-
-            for (int p = 0; p < 10; p++)
-            {
-                for (int k = 0; k < data.GetLength(0); k++)
-                {
-                    //ambil bobot sesuai karakter arraykelas[k], if a select from platbobt ambil yang a = bobot1
-                    string bbt = "SELECT * FROM PlatBobot where kelasBB == "+arraykelas[k]+" ";
-                    OleDbCommand getbb = new OleDbCommand(sqli, con);
-                    OleDbDataReader rowsbb = getbb.ExecuteReader();
-
-                    int z =  0;
-                    while (rowsbb.Read())
-                    {
-                        kelasBB.Add(rowsbb[1].ToString());
-                    }
-
-                    double[] arrayBiner = new double[data.GetLength(1)];
-                    //int tempTarget = target[k];// target data
-                    
-                    for (int j = 0; j < data.GetLength(1); j++)
-                    {
-                        arrayBiner[j] = arrayekstraksi[k, j];// data = data yg ada dalam database
-                    }
-
-                    //double[] bobot1 = new double[kelasBB];
-
-                    for (int m = 0; m < data.GetLength(1); m++)
-                    {
-                        //bobot1 = elveki(bobot1, arraybobot[m], arrayBiner, alpha);
-
-                        bobot1 = elveki(bobot1, bobot2, arrayBiner, alpha);
-                    }
-
-                    //input data if insert / update where arraykelas- abek outputBobotupdate
-                    string bbtInput = "SELECT * FROM PlatBobot where ";
-                    OleDbCommand bbInput = new OleDbCommand(bbtInput, con);
-                }
-
-                alpha = alpha - (0.1 * alpha);
-            }
-            con.Close();
-
+            // Klasifikasi // Testing
         }
+
 
         //membalik warna
         private Bitmap switchColor(Bitmap bitmap)
@@ -581,7 +569,7 @@ namespace ProjectPlat_Otw
             return sequenceCodeList.ToArray();
         }
 
-        private double[] elveki(double[] bobot1, double[] bobot2, double[] data, double alpha)
+        private double[] elveki(double[] bobot1, double[] bobot2, int[] data, double alpha)
         {
             double totalBobot1 = 0;
             double totalBobot2 = 0;
@@ -592,7 +580,7 @@ namespace ProjectPlat_Otw
                 totalBobot2 = totalBobot2 + Math.Pow((data[i] - bobot2[i]), 2);
             }
 
-            double[] outputBobot = new double[bobot.Length];
+            double[] outputBobot = new double[bobot1.Length];
 
             if (Math.Min(totalBobot1, totalBobot2) == totalBobot1)
             {

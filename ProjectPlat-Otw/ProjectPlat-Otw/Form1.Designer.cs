@@ -62,15 +62,15 @@
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.preproToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.deteksiToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.btnKlasifikasi = new System.Windows.Forms.Button();
-            this.txtKlasifikasi = new System.Windows.Forms.TextBox();
-            this.dataGridView1 = new System.Windows.Forms.DataGridView();
-            this.pictOtsu = new System.Windows.Forms.PictureBox();
             this.trainingHurufToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.greyscaleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.otsuToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.sAveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.txtKlasifikasi = new System.Windows.Forms.TextBox();
+            this.dataGridView1 = new System.Windows.Forms.DataGridView();
+            this.pictOtsu = new System.Windows.Forms.PictureBox();
             this.txtDataset = new System.Windows.Forms.TextBox();
+            this.btnTraining = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pbGrey)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbInput)).BeginInit();
             this.statusStrip1.SuspendLayout();
@@ -381,30 +381,51 @@
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
             this.openToolStripMenuItem.Text = "Open";
             // 
             // preproToolStripMenuItem
             // 
             this.preproToolStripMenuItem.Name = "preproToolStripMenuItem";
-            this.preproToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.preproToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
             this.preproToolStripMenuItem.Text = "Tambah Data";
             // 
             // deteksiToolStripMenuItem
             // 
             this.deteksiToolStripMenuItem.Name = "deteksiToolStripMenuItem";
-            this.deteksiToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.deteksiToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
             this.deteksiToolStripMenuItem.Text = "Deteksi ";
             // 
-            // btnKlasifikasi
+            // trainingHurufToolStripMenuItem
             // 
-            this.btnKlasifikasi.Location = new System.Drawing.Point(334, 365);
-            this.btnKlasifikasi.Name = "btnKlasifikasi";
-            this.btnKlasifikasi.Size = new System.Drawing.Size(75, 23);
-            this.btnKlasifikasi.TabIndex = 32;
-            this.btnKlasifikasi.Text = "Klasifikasi";
-            this.btnKlasifikasi.UseVisualStyleBackColor = true;
-            this.btnKlasifikasi.Click += new System.EventHandler(this.btnKlasifikasi_Click);
+            this.trainingHurufToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.greyscaleToolStripMenuItem,
+            this.otsuToolStripMenuItem,
+            this.sAveToolStripMenuItem});
+            this.trainingHurufToolStripMenuItem.Name = "trainingHurufToolStripMenuItem";
+            this.trainingHurufToolStripMenuItem.Size = new System.Drawing.Size(95, 20);
+            this.trainingHurufToolStripMenuItem.Text = "Training Huruf";
+            // 
+            // greyscaleToolStripMenuItem
+            // 
+            this.greyscaleToolStripMenuItem.Name = "greyscaleToolStripMenuItem";
+            this.greyscaleToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.greyscaleToolStripMenuItem.Text = "Greyscale";
+            this.greyscaleToolStripMenuItem.Click += new System.EventHandler(this.greyscaleToolStripMenuItem_Click);
+            // 
+            // otsuToolStripMenuItem
+            // 
+            this.otsuToolStripMenuItem.Name = "otsuToolStripMenuItem";
+            this.otsuToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.otsuToolStripMenuItem.Text = "Otsu";
+            this.otsuToolStripMenuItem.Click += new System.EventHandler(this.otsuToolStripMenuItem_Click);
+            // 
+            // sAveToolStripMenuItem
+            // 
+            this.sAveToolStripMenuItem.Name = "sAveToolStripMenuItem";
+            this.sAveToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.sAveToolStripMenuItem.Text = "Save";
+            this.sAveToolStripMenuItem.Click += new System.EventHandler(this.sAveToolStripMenuItem_Click);
             // 
             // txtKlasifikasi
             // 
@@ -424,60 +445,39 @@
             // pictOtsu
             // 
             this.pictOtsu.BackColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.pictOtsu.Location = new System.Drawing.Point(280, 179);
+            this.pictOtsu.Location = new System.Drawing.Point(357, 179);
             this.pictOtsu.Name = "pictOtsu";
-            this.pictOtsu.Size = new System.Drawing.Size(147, 68);
+            this.pictOtsu.Size = new System.Drawing.Size(70, 68);
             this.pictOtsu.TabIndex = 35;
             this.pictOtsu.TabStop = false;
             // 
-            // trainingHurufToolStripMenuItem
-            // 
-            this.trainingHurufToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.greyscaleToolStripMenuItem,
-            this.otsuToolStripMenuItem,
-            this.sAveToolStripMenuItem});
-            this.trainingHurufToolStripMenuItem.Name = "trainingHurufToolStripMenuItem";
-            this.trainingHurufToolStripMenuItem.Size = new System.Drawing.Size(95, 20);
-            this.trainingHurufToolStripMenuItem.Text = "Training Huruf";
-            // 
-            // greyscaleToolStripMenuItem
-            // 
-            this.greyscaleToolStripMenuItem.Name = "greyscaleToolStripMenuItem";
-            this.greyscaleToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.greyscaleToolStripMenuItem.Text = "Greyscale";
-            this.greyscaleToolStripMenuItem.Click += new System.EventHandler(this.greyscaleToolStripMenuItem_Click);
-            // 
-            // otsuToolStripMenuItem
-            // 
-            this.otsuToolStripMenuItem.Name = "otsuToolStripMenuItem";
-            this.otsuToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.otsuToolStripMenuItem.Text = "Otsu";
-            this.otsuToolStripMenuItem.Click += new System.EventHandler(this.otsuToolStripMenuItem_Click);
-            // 
-            // sAveToolStripMenuItem
-            // 
-            this.sAveToolStripMenuItem.Name = "sAveToolStripMenuItem";
-            this.sAveToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.sAveToolStripMenuItem.Text = "Save";
-            this.sAveToolStripMenuItem.Click += new System.EventHandler(this.sAveToolStripMenuItem_Click);
-            // 
             // txtDataset
             // 
-            this.txtDataset.Location = new System.Drawing.Point(433, 182);
+            this.txtDataset.Location = new System.Drawing.Point(433, 179);
             this.txtDataset.Name = "txtDataset";
-            this.txtDataset.Size = new System.Drawing.Size(31, 20);
+            this.txtDataset.Size = new System.Drawing.Size(20, 20);
             this.txtDataset.TabIndex = 36;
+            // 
+            // btnTraining
+            // 
+            this.btnTraining.Location = new System.Drawing.Point(334, 365);
+            this.btnTraining.Name = "btnTraining";
+            this.btnTraining.Size = new System.Drawing.Size(75, 23);
+            this.btnTraining.TabIndex = 37;
+            this.btnTraining.Text = "Training";
+            this.btnTraining.UseVisualStyleBackColor = true;
+            this.btnTraining.Click += new System.EventHandler(this.btnTraining_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 418);
+            this.Controls.Add(this.btnTraining);
             this.Controls.Add(this.txtDataset);
             this.Controls.Add(this.pictOtsu);
             this.Controls.Add(this.dataGridView1);
             this.Controls.Add(this.txtKlasifikasi);
-            this.Controls.Add(this.btnKlasifikasi);
             this.Controls.Add(this.saveTraining);
             this.Controls.Add(this.label9);
             this.Controls.Add(this.label8);
@@ -553,7 +553,6 @@
         private System.Windows.Forms.ToolStripMenuItem openToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem preproToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem deteksiToolStripMenuItem;
-        private System.Windows.Forms.Button btnKlasifikasi;
         private System.Windows.Forms.TextBox txtKlasifikasi;
         private System.Windows.Forms.DataGridView dataGridView1;
         private System.Windows.Forms.PictureBox pictOtsu;
@@ -562,6 +561,7 @@
         private System.Windows.Forms.ToolStripMenuItem otsuToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem sAveToolStripMenuItem;
         private System.Windows.Forms.TextBox txtDataset;
+        private System.Windows.Forms.Button btnTraining;
     }
 }
 
