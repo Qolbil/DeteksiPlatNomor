@@ -66,8 +66,6 @@
             this.greyscaleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.otsuToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.sAveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.txtKlasifikasi = new System.Windows.Forms.TextBox();
-            this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.pictOtsu = new System.Windows.Forms.PictureBox();
             this.txtDataset = new System.Windows.Forms.TextBox();
             this.btnTraining = new System.Windows.Forms.Button();
@@ -79,7 +77,6 @@
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbPlat)).BeginInit();
             this.menuStrip1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictOtsu)).BeginInit();
             this.SuspendLayout();
             // 
@@ -118,9 +115,9 @@
             this.toolStripStatusLabelDirectory,
             this.toolStripStatusLabelSize,
             this.toolStripProgressBar1});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 394);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 367);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(800, 24);
+            this.statusStrip1.Size = new System.Drawing.Size(759, 24);
             this.statusStrip1.TabIndex = 20;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -145,7 +142,7 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(253, 278);
+            this.button1.Location = new System.Drawing.Point(253, 224);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 16;
@@ -155,7 +152,7 @@
             // 
             // btnProses
             // 
-            this.btnProses.Location = new System.Drawing.Point(253, 365);
+            this.btnProses.Location = new System.Drawing.Point(253, 309);
             this.btnProses.Name = "btnProses";
             this.btnProses.Size = new System.Drawing.Size(75, 23);
             this.btnProses.TabIndex = 19;
@@ -165,7 +162,7 @@
             // 
             // button3
             // 
-            this.button3.Location = new System.Drawing.Point(253, 336);
+            this.button3.Location = new System.Drawing.Point(253, 280);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(75, 23);
             this.button3.TabIndex = 18;
@@ -175,7 +172,7 @@
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(253, 307);
+            this.button2.Location = new System.Drawing.Point(253, 253);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(75, 23);
             this.button2.TabIndex = 17;
@@ -214,7 +211,7 @@
             // pbChara
             // 
             this.pbChara.BackColor = System.Drawing.Color.Gray;
-            this.pbChara.Location = new System.Drawing.Point(651, 43);
+            this.pbChara.Location = new System.Drawing.Point(603, 43);
             this.pbChara.Name = "pbChara";
             this.pbChara.Size = new System.Drawing.Size(137, 131);
             this.pbChara.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -223,7 +220,7 @@
             // 
             // rTBlog
             // 
-            this.rTBlog.Location = new System.Drawing.Point(527, 267);
+            this.rTBlog.Location = new System.Drawing.Point(486, 240);
             this.rTBlog.Name = "rTBlog";
             this.rTBlog.Size = new System.Drawing.Size(261, 121);
             this.rTBlog.TabIndex = 23;
@@ -239,7 +236,7 @@
             this.groupBox1.Controls.Add(this.label6);
             this.groupBox1.Controls.Add(this.label2);
             this.groupBox1.Controls.Add(this.label1);
-            this.groupBox1.Location = new System.Drawing.Point(12, 251);
+            this.groupBox1.Location = new System.Drawing.Point(12, 224);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(235, 137);
             this.groupBox1.TabIndex = 24;
@@ -319,7 +316,7 @@
             // pbPlat
             // 
             this.pbPlat.BackColor = System.Drawing.Color.Gray;
-            this.pbPlat.Location = new System.Drawing.Point(519, 44);
+            this.pbPlat.Location = new System.Drawing.Point(471, 43);
             this.pbPlat.Name = "pbPlat";
             this.pbPlat.Size = new System.Drawing.Size(126, 130);
             this.pbPlat.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
@@ -329,7 +326,7 @@
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(572, 28);
+            this.label8.Location = new System.Drawing.Point(518, 27);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(25, 13);
             this.label8.TabIndex = 27;
@@ -338,7 +335,7 @@
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(675, 27);
+            this.label9.Location = new System.Drawing.Point(629, 27);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(86, 13);
             this.label9.TabIndex = 28;
@@ -347,7 +344,7 @@
             // saveTraining
             // 
             this.saveTraining.AutoEllipsis = true;
-            this.saveTraining.Location = new System.Drawing.Point(334, 336);
+            this.saveTraining.Location = new System.Drawing.Point(253, 338);
             this.saveTraining.Name = "saveTraining";
             this.saveTraining.Size = new System.Drawing.Size(75, 23);
             this.saveTraining.TabIndex = 29;
@@ -364,7 +361,7 @@
             this.trainingHurufToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(800, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(759, 24);
             this.menuStrip1.TabIndex = 31;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -427,21 +424,6 @@
             this.sAveToolStripMenuItem.Text = "Save";
             this.sAveToolStripMenuItem.Click += new System.EventHandler(this.sAveToolStripMenuItem_Click);
             // 
-            // txtKlasifikasi
-            // 
-            this.txtKlasifikasi.Location = new System.Drawing.Point(415, 274);
-            this.txtKlasifikasi.Name = "txtKlasifikasi";
-            this.txtKlasifikasi.Size = new System.Drawing.Size(106, 20);
-            this.txtKlasifikasi.TabIndex = 33;
-            // 
-            // dataGridView1
-            // 
-            this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView1.Location = new System.Drawing.Point(415, 304);
-            this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.Size = new System.Drawing.Size(106, 82);
-            this.dataGridView1.TabIndex = 34;
-            // 
             // pictOtsu
             // 
             this.pictOtsu.BackColor = System.Drawing.SystemColors.ControlDarkDark;
@@ -460,7 +442,7 @@
             // 
             // btnTraining
             // 
-            this.btnTraining.Location = new System.Drawing.Point(334, 365);
+            this.btnTraining.Location = new System.Drawing.Point(334, 338);
             this.btnTraining.Name = "btnTraining";
             this.btnTraining.Size = new System.Drawing.Size(75, 23);
             this.btnTraining.TabIndex = 37;
@@ -472,12 +454,10 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 418);
+            this.ClientSize = new System.Drawing.Size(759, 391);
             this.Controls.Add(this.btnTraining);
             this.Controls.Add(this.txtDataset);
             this.Controls.Add(this.pictOtsu);
-            this.Controls.Add(this.dataGridView1);
-            this.Controls.Add(this.txtKlasifikasi);
             this.Controls.Add(this.saveTraining);
             this.Controls.Add(this.label9);
             this.Controls.Add(this.label8);
@@ -511,7 +491,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.pbPlat)).EndInit();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictOtsu)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -553,8 +532,6 @@
         private System.Windows.Forms.ToolStripMenuItem openToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem preproToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem deteksiToolStripMenuItem;
-        private System.Windows.Forms.TextBox txtKlasifikasi;
-        private System.Windows.Forms.DataGridView dataGridView1;
         private System.Windows.Forms.PictureBox pictOtsu;
         private System.Windows.Forms.ToolStripMenuItem trainingHurufToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem greyscaleToolStripMenuItem;

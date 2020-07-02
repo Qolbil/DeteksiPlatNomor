@@ -53,7 +53,12 @@ namespace ProjectPlat_Otw
             resizeBlob = new Bitmap(20, 20);
             destRect = new Rectangle(0, 0, 480, 360);
             destRectBlob = new Rectangle(0, 0, 20, 20);
-            con.ConnectionString = @"Provider = Microsoft.ACE.OLEDB.12.0; Data Source = E:\Kuliah\ScriptSong\Data\dataPlat.accdb; Persist Security Info = False; ";
+
+            string Path = Environment.CurrentDirectory;
+            string[] appPath = Path.Split(new string[] { "bin" }, StringSplitOptions.None);
+            AppDomain.CurrentDomain.SetData("DataDirectory", appPath[0]);
+            con.ConnectionString = @"Provider = Microsoft.ACE.OLEDB.12.0; Data Source = |DataDirectory|\dataPlat.accdb; Persist Security Info = False; ";
+            //con.ConnectionString = @"Provider = Microsoft.ACE.OLEDB.12.0; Data Source = E:\Kuliah\ScriptSong\Data\dataPlat.accdb; Persist Security Info = False; ";
 
             resizeImg.SetResolution(resizeImg.HorizontalResolution, resizeImg.VerticalResolution);
             
@@ -101,6 +106,7 @@ namespace ProjectPlat_Otw
             HistogramEqualization filter = new HistogramEqualization();
             filter.ApplyInPlace(imgGreyBit);
             pbGrey.Image = imgGreyBit;/*<Bgr, byte>().ToBitmap<Bgr, byte>();*/
+            LogAction("Berhasil Menerapkan Greyscale");
         }
 
         private void button3_Click(object sender, EventArgs e)
@@ -111,18 +117,12 @@ namespace ProjectPlat_Otw
             //dilasi
             img_DilasiBin = imgOtsu.Convert<Gray, byte>().Dilate(1);
             //Histogram Equalization
-
-
             //pbOtsu.Image = img_DilasiBin.ToBitmap();
             //pictOtsu.Image = imgOtsu.ToBitmap();
             //pictOtsu.SizeMode = PictureBoxSizeMode.Zoom;
             img_Pembalik = switchColor(new Bitmap(img_DilasiBin.ToBitmap()));
             BlobSquare();
-            //WaitCallback del = delegate
-            //{
-            //    this.Invoke(new Action(() => BlobSquare((Bitmap)pbOtsu.Image)));
-            //};
-            //ThreadPool.QueueUserWorkItem(del);
+            
         }
         
         private void btnProses_Click(object sender, EventArgs e)
@@ -184,9 +184,9 @@ namespace ProjectPlat_Otw
                     insert.CommandText = "INSERT INTO PlatTraining (Kelas, array1D) values ('" + txtBoxList[i].Text + "','" + arrayBlobs[i] + "' ) ";
                     int a = insert.ExecuteNonQuery();
                     con.Close();
-                    if (a == 0) { MessageBox.Show("gagal", "Huu", MessageBoxButtons.OK); }
+                    if (a == 0) { LogAction("Data Tidak ter simpan"); }
                     //Not updated.
-                    else { MessageBox.Show("berhasil", "Yee", MessageBoxButtons.OK); }
+                    else { LogAction("Data Berhasil Disimpan"); }
                 }
                 //Updated.
                 catch (Exception ex)
@@ -213,9 +213,10 @@ namespace ProjectPlat_Otw
                     insert.CommandText = "INSERT INTO PlatTraining (Kelas, array1D) values ('" + txtBoxList[i].Text + "','" + arrayBlobs[i] + "' ) ";
                     int a = insert.ExecuteNonQuery();
                     con.Close();
-                    if (a == 0) { MessageBox.Show("gagal", "Data Gagal Disimpan", MessageBoxButtons.OK); }
+                    if (a == 0) { LogAction("Data Tidak ter simpan"); }
                     //Not updated.
-                    else { MessageBox.Show("berhasil", "Data Berhasil Disimpan", MessageBoxButtons.OK); }
+                    else { LogAction("Data Berhasil Disimpan"); }
+                    LogAction("Data Berhasil Disimpan");
                 }
                 //Updated.
                 catch (Exception ex)
@@ -247,7 +248,7 @@ namespace ProjectPlat_Otw
                 {
                     arrayEkstraksi[i] = new int[row[2].ToString().Length];
                     arrayEkstraksi[i][j] = int.Parse(row[2].ToString().Substring(j, 1));
-                    Console.WriteLine("Sub string: " + arrayEkstraksi[i][j].ToString());
+                    //Console.WriteLine("Sub string: " + arrayEkstraksi[i][j].ToString());
                 }
                 i++;
             }
@@ -269,7 +270,7 @@ namespace ProjectPlat_Otw
                 {
                     arrayEkstraksiBobot[q] = new double[rows[2].ToString().Length];
                     arrayEkstraksiBobot[q][j] = double.Parse(rows[2].ToString().Substring(j, 1));
-                    Console.WriteLine("Sub string: " + arrayEkstraksiBobot[q][j].ToString());
+                    //Console.WriteLine("Sub string: " + arrayEkstraksiBobot[q][j].ToString());
                 }
                 q++;
             }
@@ -284,10 +285,9 @@ namespace ProjectPlat_Otw
                     if (arrayEkstraksi[k] == null) { break; }
 
                     // Mencari karakter di arrayKelasBobot berdasarkan karakter arrayKelas[k], kemudian ambil indeks/posisi/lokasi nya
-                    int indeks = Array.IndexOf(arrayKelasBobot.ToArray(), arrayKelas[k]);
+                    int indeks = arrayKelasBobot.IndexOf(arrayKelas[k]);
 
                     //Mencari ekstraksi berdasarkan indeks/ posisi / lokasi
-                    bobot = new double[400];
                     bobot = arrayEkstraksiBobot[indeks];
 
                     // Ulangi sebanyak data ekstraksi bobot
@@ -301,13 +301,13 @@ namespace ProjectPlat_Otw
                     }
 
                     // Update table(bobot) values(string.Join("-", arrayEkstraksiBobot[indeks])) where kelas = arrayKelasBobot[indeks]
-                    string bbtInput = "SELECT * FROM PlatBobot where ";
-                    OleDbCommand bbInput = new OleDbCommand(bbtInput, con);
+                    //string bbtInput = "SELECT * FROM PlatBobot where ";
+                    //OleDbCommand bbInput = new OleDbCommand(bbtInput, con);
                 }
 
                 alpha = alpha - (0.1 * alpha);
             }
-            MessageBox.Show("OK", "Training Telah Selesai", MessageBoxButtons.OK);
+            LogAction("Data Telah Ditraining");
             con.Close();
         }
 
@@ -358,13 +358,11 @@ namespace ProjectPlat_Otw
                 graphics.DrawImage(originalImage, 0, 0, cropRectangle, GraphicsUnit.Pixel);
                 img_Plat = cropi;
                 //pbPlat.Image = new ExtractBiggestBlob().Apply(image);
-                //LogAction("Detected " + blobs.Length + " blobs present.");
-                //LogStatus(true);
+                LogAction("Detected " + blobs.Length + " blobs present.");
             }
             else
             {
-                //LogAction("Detected " + blobs.Length + " blobs present.");
-                //LogStatus(false);
+                LogAction("Detected " + blobs.Length + " blobs present.");
                 //pbOtsu.Image = image;
             }
         }
@@ -373,8 +371,7 @@ namespace ProjectPlat_Otw
         {
             // Klasifikasi // Testing
         }
-
-
+        
         //membalik warna
         private Bitmap switchColor(Bitmap bitmap)
         {
