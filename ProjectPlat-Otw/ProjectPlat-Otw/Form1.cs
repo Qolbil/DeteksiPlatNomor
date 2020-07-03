@@ -303,9 +303,11 @@ namespace ProjectPlat_Otw
                     }
 
                     //Update table(bobot) values(string.Join("-", arrayEkstraksiBobot[indeks])) where kelas = arrayKelasBobot[indeks]
+                    String[] bbtString = bobot.Select(x => x.ToString()).ToArray();
+                    Console.WriteLine(bbtString);
                     OleDbCommand bbtInput = new OleDbCommand();
-                    bbtInput.Connection = con;
-                    bbtInput.CommandText = "Update PlatW SET bobotBaru = '" + string.Join(" ", bobot) + "' where kelasBB = '" + arrayKelasBobot[indeks] +"'";
+                    bbtInput.Connection = con;  
+                    bbtInput.CommandText = "Update PlatW SET bobotBaru = '" + bbtString + "' where kelasBB = '" + arrayKelasBobot[indeks] +"'";
                     int a = bbtInput.ExecuteNonQuery();
                     if (a == 0) { LogAction("Gagal Menyimpan Data"); }
                     else { LogAction("Berhasil Menyimpan Data"); Console.ReadLine(); }
