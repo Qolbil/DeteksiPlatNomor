@@ -57,8 +57,8 @@ namespace ProjectPlat_Otw
             string Path = Environment.CurrentDirectory;
             string[] appPath = Path.Split(new string[] { "bin" }, StringSplitOptions.None);
             AppDomain.CurrentDomain.SetData("DataDirectory", appPath[0]);
-            con.ConnectionString = @"Provider = Microsoft.ACE.OLEDB.12.0; Data Source = |DataDirectory|\dataPlat.accdb; Persist Security Info = False; ";
-            //con.ConnectionString = @"Provider = Microsoft.ACE.OLEDB.12.0; Data Source = E:\Kuliah\ScriptSong\Data\dataPlat.accdb; Persist Security Info = False; ";
+            //con.ConnectionString = @"Provider = Microsoft.ACE.OLEDB.12.0; Data Source = |DataDirectory|\dataPlat.accdb; Persist Security Info = False; ";
+            con.ConnectionString = @"Provider = Microsoft.ACE.OLEDB.12.0; Data Source = E:\Kuliah\ScriptSong\Data\dataPlat.accdb; Persist Security Info = False; ";
 
             resizeImg.SetResolution(resizeImg.HorizontalResolution, resizeImg.VerticalResolution);
             
@@ -121,6 +121,7 @@ namespace ProjectPlat_Otw
             //pictOtsu.Image = imgOtsu.ToBitmap();
             //pictOtsu.SizeMode = PictureBoxSizeMode.Zoom;
             img_Pembalik = switchColor(new Bitmap(img_DilasiBin.ToBitmap()));
+            LogAction("Berhasil Menerapkan Otsu");
             BlobSquare();
             
         }
@@ -130,6 +131,8 @@ namespace ProjectPlat_Otw
             
             pbPlat.Image = colorSwitch(new Bitmap(img_Plat));
 
+            arrayBlobs.Clear();
+            txtBoxList.Clear();
             WaitCallback del = delegate
             {
                 this.Invoke(new Action(() => BlobDetection((Bitmap)pbChara.Image)));
@@ -161,7 +164,7 @@ namespace ProjectPlat_Otw
             //dilasi
             img_DilasiBin = imgOtsu.Convert<Gray, byte>().Dilate(1);
             cropi = resizingBlob(img_DilasiBin.AsBitmap()); 
-            pictOtsu.Image = cropi;
+            pbOtsu.Image = cropi;
             arrayBlobs.Clear();
             txtBoxList.Clear();
             arrayBlobs.Add(string.Join("", array1D(cropi)));
@@ -181,12 +184,12 @@ namespace ProjectPlat_Otw
                     con.Open();
                     OleDbCommand insert = new OleDbCommand();
                     insert.Connection = con;
-                    insert.CommandText = "INSERT INTO PlatTraining (Kelas, array1D) values ('" + txtBoxList[i].Text + "','" + arrayBlobs[i] + "' ) ";
+                    insert.CommandText = "INSERT INTO PlatPelatihan (Kelas, array1D) values ('" + txtBoxList[i].Text + "','" + arrayBlobs[i] + "' ) ";
                     int a = insert.ExecuteNonQuery();
                     con.Close();
-                    if (a == 0) { LogAction("Data Tidak ter simpan"); }
+                    if (a == 0) { LogAction("Gagal Menyimpan Data"); }
                     //Not updated.
-                    else { LogAction("Data Berhasil Disimpan"); }
+                    else { LogAction("Berhasil Menyimpan Data"); }
                 }
                 //Updated.
                 catch (Exception ex)
@@ -210,13 +213,12 @@ namespace ProjectPlat_Otw
                     con.Open();
                     OleDbCommand insert = new OleDbCommand();
                     insert.Connection = con;
-                    insert.CommandText = "INSERT INTO PlatTraining (Kelas, array1D) values ('" + txtBoxList[i].Text + "','" + arrayBlobs[i] + "' ) ";
+                    insert.CommandText = "INSERT INTO PlatPelatihan (Kelas, array1D) values ('" + txtBoxList[i].Text + "','" + arrayBlobs[i] + "' ) ";
                     int a = insert.ExecuteNonQuery();
                     con.Close();
-                    if (a == 0) { LogAction("Data Tidak ter simpan"); }
+                    if (a == 0) { LogAction("Gagal Menyimpan Data"); }
                     //Not updated.
-                    else { LogAction("Data Berhasil Disimpan"); }
-                    LogAction("Data Berhasil Disimpan");
+                    else { LogAction("Berhasil Menyimpan Data"); }
                 }
                 //Updated.
                 catch (Exception ex)
@@ -231,7 +233,7 @@ namespace ProjectPlat_Otw
             con.Open();
 
             // Ambil data training
-            string sql = "SELECT * FROM PlatTraining";
+            string sql = "SELECT * FROM PlatPelatihan";
             OleDbCommand get = new OleDbCommand(sql, con);
             OleDbDataReader row = get.ExecuteReader();
 
@@ -254,7 +256,7 @@ namespace ProjectPlat_Otw
             }
 
             // Ambil data bobot
-            string sqli = "SELECT * FROM PlatBobot";
+            string sqli = "SELECT * FROM PlatW";
             OleDbCommand get1 = new OleDbCommand(sqli, con);
             OleDbDataReader rows = get1.ExecuteReader();
 
@@ -300,9 +302,15 @@ namespace ProjectPlat_Otw
                         bobot = elveki(bobot, arrayEkstraksiBobot[m], arrayEkstraksi[k], alpha);
                     }
 
-                    // Update table(bobot) values(string.Join("-", arrayEkstraksiBobot[indeks])) where kelas = arrayKelasBobot[indeks]
-                    //string bbtInput = "SELECT * FROM PlatBobot where ";
-                    //OleDbCommand bbInput = new OleDbCommand(bbtInput, con);
+                    //Update table(bobot) values(string.Join("-", arrayEkstraksiBobot[indeks])) where kelas = arrayKelasBobot[indeks]
+                    OleDbCommand bbtInput = new OleDbCommand();
+                    bbtInput.Connection = con;
+                    bbtInput.CommandText = "Update PlatW SET bobotBaru = '" + string.Join(" ", bobot) + "' where kelasBB = '" + arrayKelasBobot[indeks] +"'";
+                    int a = bbtInput.ExecuteNonQuery();
+                    if (a == 0) { LogAction("Gagal Menyimpan Data"); }
+                    else { LogAction("Berhasil Menyimpan Data"); Console.ReadLine(); }
+                    
+
                 }
 
                 alpha = alpha - (0.1 * alpha);
