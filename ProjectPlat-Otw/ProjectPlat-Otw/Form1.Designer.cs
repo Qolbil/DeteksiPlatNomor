@@ -34,7 +34,6 @@
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabelDirectory = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabelSize = new System.Windows.Forms.ToolStripStatusLabel();
-            this.toolStripProgressBar1 = new System.Windows.Forms.ToolStripProgressBar();
             this.button1 = new System.Windows.Forms.Button();
             this.btnProses = new System.Windows.Forms.Button();
             this.button3 = new System.Windows.Forms.Button();
@@ -66,9 +65,10 @@
             this.greyscaleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.otsuToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.sAveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.pictOtsu = new System.Windows.Forms.PictureBox();
             this.txtDataset = new System.Windows.Forms.TextBox();
             this.btnTraining = new System.Windows.Forms.Button();
+            this.button4 = new System.Windows.Forms.Button();
+            this.button5 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pbGrey)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbInput)).BeginInit();
             this.statusStrip1.SuspendLayout();
@@ -77,7 +77,6 @@
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbPlat)).BeginInit();
             this.menuStrip1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictOtsu)).BeginInit();
             this.SuspendLayout();
             // 
             // label3
@@ -113,8 +112,7 @@
             // 
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabelDirectory,
-            this.toolStripStatusLabelSize,
-            this.toolStripProgressBar1});
+            this.toolStripStatusLabelSize});
             this.statusStrip1.Location = new System.Drawing.Point(0, 367);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(759, 24);
@@ -134,11 +132,6 @@
             this.toolStripStatusLabelSize.Name = "toolStripStatusLabelSize";
             this.toolStripStatusLabelSize.Size = new System.Drawing.Size(31, 19);
             this.toolStripStatusLabelSize.Text = "Size";
-            // 
-            // toolStripProgressBar1
-            // 
-            this.toolStripProgressBar1.Name = "toolStripProgressBar1";
-            this.toolStripProgressBar1.Size = new System.Drawing.Size(100, 18);
             // 
             // button1
             // 
@@ -424,25 +417,16 @@
             this.sAveToolStripMenuItem.Text = "Save";
             this.sAveToolStripMenuItem.Click += new System.EventHandler(this.sAveToolStripMenuItem_Click);
             // 
-            // pictOtsu
-            // 
-            this.pictOtsu.BackColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.pictOtsu.Location = new System.Drawing.Point(357, 179);
-            this.pictOtsu.Name = "pictOtsu";
-            this.pictOtsu.Size = new System.Drawing.Size(70, 68);
-            this.pictOtsu.TabIndex = 35;
-            this.pictOtsu.TabStop = false;
-            // 
             // txtDataset
             // 
-            this.txtDataset.Location = new System.Drawing.Point(433, 179);
+            this.txtDataset.Location = new System.Drawing.Point(445, 179);
             this.txtDataset.Name = "txtDataset";
             this.txtDataset.Size = new System.Drawing.Size(20, 20);
             this.txtDataset.TabIndex = 36;
             // 
             // btnTraining
             // 
-            this.btnTraining.Location = new System.Drawing.Point(334, 338);
+            this.btnTraining.Location = new System.Drawing.Point(334, 280);
             this.btnTraining.Name = "btnTraining";
             this.btnTraining.Size = new System.Drawing.Size(75, 23);
             this.btnTraining.TabIndex = 37;
@@ -450,14 +434,33 @@
             this.btnTraining.UseVisualStyleBackColor = true;
             this.btnTraining.Click += new System.EventHandler(this.btnTraining_Click);
             // 
+            // button4
+            // 
+            this.button4.Location = new System.Drawing.Point(334, 309);
+            this.button4.Name = "button4";
+            this.button4.Size = new System.Drawing.Size(75, 23);
+            this.button4.TabIndex = 38;
+            this.button4.Text = "Klasifikasi";
+            this.button4.UseVisualStyleBackColor = true;
+            // 
+            // button5
+            // 
+            this.button5.Location = new System.Drawing.Point(334, 338);
+            this.button5.Name = "button5";
+            this.button5.Size = new System.Drawing.Size(75, 23);
+            this.button5.TabIndex = 39;
+            this.button5.Text = "button5";
+            this.button5.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(759, 391);
+            this.Controls.Add(this.button5);
+            this.Controls.Add(this.button4);
             this.Controls.Add(this.btnTraining);
             this.Controls.Add(this.txtDataset);
-            this.Controls.Add(this.pictOtsu);
             this.Controls.Add(this.saveTraining);
             this.Controls.Add(this.label9);
             this.Controls.Add(this.label8);
@@ -491,7 +494,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.pbPlat)).EndInit();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictOtsu)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -504,7 +506,6 @@
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabelDirectory;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabelSize;
-        private System.Windows.Forms.ToolStripProgressBar toolStripProgressBar1;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button btnProses;
         private System.Windows.Forms.Button button3;
@@ -532,13 +533,14 @@
         private System.Windows.Forms.ToolStripMenuItem openToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem preproToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem deteksiToolStripMenuItem;
-        private System.Windows.Forms.PictureBox pictOtsu;
         private System.Windows.Forms.ToolStripMenuItem trainingHurufToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem greyscaleToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem otsuToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem sAveToolStripMenuItem;
         private System.Windows.Forms.TextBox txtDataset;
         private System.Windows.Forms.Button btnTraining;
+        private System.Windows.Forms.Button button4;
+        private System.Windows.Forms.Button button5;
     }
 }
 

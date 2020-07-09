@@ -75,7 +75,6 @@ namespace ProjectPlat_Otw
 
             toolStripStatusLabelDirectory.Text = "";
             toolStripStatusLabelSize.Text = "";
-            toolStripProgressBar1.Visible = false;
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -238,7 +237,7 @@ namespace ProjectPlat_Otw
             OleDbDataReader row = get.ExecuteReader();
 
             List<string> arrayKelas = new List<string>();
-            int[][] arrayEkstraksi = new int[1000][];
+            double[][] arrayEkstraksi = new double[1000][];
 
             // Memasukkan data ke dalam array
             int i = 0;
@@ -248,8 +247,8 @@ namespace ProjectPlat_Otw
 
                 for (int j = 0; j < row[2].ToString().Length; j++)
                 {
-                    arrayEkstraksi[i] = new int[row[2].ToString().Length];
-                    arrayEkstraksi[i][j] = int.Parse(row[2].ToString().Substring(j, 1));
+                    arrayEkstraksi[i] = new double[row[2].ToString().Length];
+                    arrayEkstraksi[i][j] = double.Parse(row[2].ToString().Substring(j, 1));
                     //Console.WriteLine("Sub string: " + arrayEkstraksi[i][j].ToString());
                 }
                 i++;
@@ -277,7 +276,7 @@ namespace ProjectPlat_Otw
                 q++;
             }
 
-            // Training sebanyak 10 iterasi
+            // Training sebanyak 10 iterasi/epoch
             for (int p = 0; p < 10; p++)
             {
                 // Ulangi sebanyak data ekstraksi
@@ -307,7 +306,7 @@ namespace ProjectPlat_Otw
                     Console.WriteLine(bbtString);
                     OleDbCommand bbtInput = new OleDbCommand();
                     bbtInput.Connection = con;  
-                    bbtInput.CommandText = "Update PlatW SET bobotBaru = '" + bbtString + "' where kelasBB = '" + arrayKelasBobot[indeks] +"'";
+                    bbtInput.CommandText = "Update PlatW SET bobotBaru = '" + string.Join(" ",bbtString) + "' where kelasBB = '" + arrayKelasBobot[indeks] +"'";
                     int a = bbtInput.ExecuteNonQuery();
                     if (a == 0) { LogAction("Gagal Menyimpan Data"); }
                     else { LogAction("Berhasil Menyimpan Data"); Console.ReadLine(); }
@@ -576,7 +575,7 @@ namespace ProjectPlat_Otw
             return sequenceCodeList.ToArray();
         }
 
-        private double[] elveki(double[] bobot1, double[] bobot2, int[] data, double alpha)
+        private double[] elveki(double[] bobot1, double[] bobot2, double[] data, double alpha)
         {
             double totalBobot1 = 0;
             double totalBobot2 = 0;
