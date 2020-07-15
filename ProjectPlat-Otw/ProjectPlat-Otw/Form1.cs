@@ -18,6 +18,8 @@ using Emgu.CV.Structure;
 
 using AForge.Imaging;
 using AForge.Imaging.Filters;
+using System.Text.RegularExpressions;
+using Emgu.CV.CvEnum;
 
 namespace ProjectPlat_Otw
 {
@@ -27,8 +29,7 @@ namespace ProjectPlat_Otw
         Image<Gray, byte> imgGray;
         Image<Gray, byte> imgOtsu;
         Image<Gray, byte> img_DilasiBin;
-        Image<Gray, byte> img_histogramEqualization;
-        private Bitmap img_Pembalik, img_Plat, cropi, resizeBlob, resizeImg, bitmapOpen;
+        private Bitmap img_Pembalik, img_Plat, cropi, resizeBlob, resizeImg, bitmapOpen, copy, newimg;
         private List<string> arrayBlobs;
         private System.Drawing.Point min, max;
         private Rectangle cropRectangle, destRect, destRectBlob; 
@@ -40,8 +41,10 @@ namespace ProjectPlat_Otw
         private OleDbConnection con = new OleDbConnection();
         private List<TextBox> txtBoxList;
         private double[] bobot, data;
-        private int temTarget, statusTarget;
         private double alpha;
+        private int r, g, b, w, h, size;
+        private Rectangle newrect;
+        private string str, imgChain;
 
         public Form1()
         {
@@ -57,7 +60,6 @@ namespace ProjectPlat_Otw
             string Path = Environment.CurrentDirectory;
             string[] appPath = Path.Split(new string[] { "bin" }, StringSplitOptions.None);
             AppDomain.CurrentDomain.SetData("DataDirectory", appPath[0]);
-            //con.ConnectionString = @"Provider = Microsoft.ACE.OLEDB.12.0; Data Source = |DataDirectory|\dataPlat.accdb; Persist Security Info = False; ";
             con.ConnectionString = @"Provider = Microsoft.ACE.OLEDB.12.0; Data Source = E:\Kuliah\ScriptSong\Data\dataPlat.accdb; Persist Security Info = False; ";
 
             resizeImg.SetResolution(resizeImg.HorizontalResolution, resizeImg.VerticalResolution);
@@ -115,21 +117,20 @@ namespace ProjectPlat_Otw
             CvInvoke.Threshold (imgGray, imgOtsu, 300, 255, Emgu.CV.CvEnum.ThresholdType.Otsu);
             //dilasi
             img_DilasiBin = imgOtsu.Convert<Gray, byte>().Dilate(1);
+            img_Pembalik = switchColor(new Bitmap(img_DilasiBin.ToBitmap()));
             //Histogram Equalization
             //pbOtsu.Image = img_DilasiBin.ToBitmap();
             //pictOtsu.Image = imgOtsu.ToBitmap();
             //pictOtsu.SizeMode = PictureBoxSizeMode.Zoom;
-            img_Pembalik = switchColor(new Bitmap(img_DilasiBin.ToBitmap()));
             LogAction("Berhasil Menerapkan Otsu");
             BlobSquare();
-            
+
         }
-        
+
         private void btnProses_Click(object sender, EventArgs e)
         {
-            
-            pbPlat.Image = colorSwitch(new Bitmap(img_Plat));
 
+            pbPlat.Image = colorSwitch(new Bitmap(img_Plat));
             arrayBlobs.Clear();
             txtBoxList.Clear();
             WaitCallback del = delegate
@@ -162,11 +163,13 @@ namespace ProjectPlat_Otw
             CvInvoke.Threshold(imgGray, imgOtsu, 300, 255, Emgu.CV.CvEnum.ThresholdType.Otsu);
             //dilasi
             img_DilasiBin = imgOtsu.Convert<Gray, byte>().Dilate(1);
-            cropi = resizingBlob(img_DilasiBin.AsBitmap()); 
+            cropi = resizingBlob(img_DilasiBin.AsBitmap());
+            imgChain = ChainCode(cropi);
+            //Console.WriteLine(imgChain);
             pbOtsu.Image = cropi;
             arrayBlobs.Clear();
             txtBoxList.Clear();
-            arrayBlobs.Add(string.Join("", array1D(cropi)));
+            arrayBlobs.Add(string.Join("", imgChain));
             txtBoxList.Add(txtDataset);
 
             //pictOtsu.Image = imgOtsu.ToBitmap();
@@ -183,7 +186,7 @@ namespace ProjectPlat_Otw
                     con.Open();
                     OleDbCommand insert = new OleDbCommand();
                     insert.Connection = con;
-                    insert.CommandText = "INSERT INTO PlatPelatihan (Kelas, array1D) values ('" + txtBoxList[i].Text + "','" + arrayBlobs[i] + "' ) ";
+                    insert.CommandText = "INSERT INTO PlatTrainChaincode (Kelas, array1D) values ('" + txtBoxList[i].Text + "','" + arrayBlobs[i] + "' ) ";
                     int a = insert.ExecuteNonQuery();
                     con.Close();
                     if (a == 0) { LogAction("Gagal Menyimpan Data"); }
@@ -212,7 +215,9 @@ namespace ProjectPlat_Otw
                     con.Open();
                     OleDbCommand insert = new OleDbCommand();
                     insert.Connection = con;
-                    insert.CommandText = "INSERT INTO PlatPelatihan (Kelas, array1D) values ('" + txtBoxList[i].Text + "','" + arrayBlobs[i] + "' ) ";
+                    insert.CommandText = "INSERT INTO PlatTrainChaincode (Kelas, array1D) values ('" + txtBoxList[i].Text + "','" + arrayBlobs[i] + "' ) ";
+                    //insert.CommandText = "Update PlatTrainChaincode SET array1D = '" + arrayBlobs[i] + "' where kelas = '"+ txtBoxList[i].Text +"' ";
+                    //bbtInput.CommandText = "Update PlatBBChaincode SET bobotBaru = '" + string.Join(" ",bbtString) + "' where kelasBB = '" + arrayKelasBobot[indeks] +"'";
                     int a = insert.ExecuteNonQuery();
                     con.Close();
                     if (a == 0) { LogAction("Gagal Menyimpan Data"); }
@@ -233,6 +238,7 @@ namespace ProjectPlat_Otw
 
             // Ambil data training
             string sql = "SELECT * FROM PlatPelatihan";
+            //string sql = "SELECT * FROM PlatTrainChaincode";
             OleDbCommand get = new OleDbCommand(sql, con);
             OleDbDataReader row = get.ExecuteReader();
 
@@ -244,17 +250,17 @@ namespace ProjectPlat_Otw
             while (row.Read())
             {
                 arrayKelas.Add(row[1].ToString());
+                arrayEkstraksi[i] = new double[row[2].ToString().Length];
 
                 for (int j = 0; j < row[2].ToString().Length; j++)
                 {
-                    arrayEkstraksi[i] = new double[row[2].ToString().Length];
                     arrayEkstraksi[i][j] = double.Parse(row[2].ToString().Substring(j, 1));
-                    //Console.WriteLine("Sub string: " + arrayEkstraksi[i][j].ToString());
-                }
+                }   
                 i++;
             }
 
             // Ambil data bobot
+            //string sqli = "SELECT * FROM PlatBBChaincode";
             string sqli = "SELECT * FROM PlatW";
             OleDbCommand get1 = new OleDbCommand(sqli, con);
             OleDbDataReader rows = get1.ExecuteReader();
@@ -267,9 +273,10 @@ namespace ProjectPlat_Otw
             while (rows.Read())
             {
                 arrayKelasBobot.Add(rows[1].ToString());
+                arrayEkstraksiBobot[q] = new double[rows[2].ToString().Length];
+
                 for (int j = 0; j < rows[2].ToString().Length; j++)
                 {
-                    arrayEkstraksiBobot[q] = new double[rows[2].ToString().Length];
                     arrayEkstraksiBobot[q][j] = double.Parse(rows[2].ToString().Substring(j, 1));
                     //Console.WriteLine("Sub string: " + arrayEkstraksiBobot[q][j].ToString());
                 }
@@ -303,10 +310,11 @@ namespace ProjectPlat_Otw
 
                     //Update table(bobot) values(string.Join("-", arrayEkstraksiBobot[indeks])) where kelas = arrayKelasBobot[indeks]
                     String[] bbtString = bobot.Select(x => x.ToString()).ToArray();
-                    Console.WriteLine(bbtString);
+                    //Console.WriteLine(bbtString);
                     OleDbCommand bbtInput = new OleDbCommand();
-                    bbtInput.Connection = con;  
-                    bbtInput.CommandText = "Update PlatW SET bobotBaru = '" + string.Join(" ",bbtString) + "' where kelasBB = '" + arrayKelasBobot[indeks] +"'";
+                    bbtInput.Connection = con;
+                    bbtInput.CommandText = "Update PlatW SET bobotBaru = '" + string.Join(" ", bbtString) + "' where kelasBB = '" + arrayKelasBobot[indeks] + "'";
+                    //bbtInput.CommandText = "Update PlatBBChaincode SET bobotBaru = '" + string.Join(" ",bbtString) + "' where kelasBB = '" + arrayKelasBobot[indeks] +"'";
                     int a = bbtInput.ExecuteNonQuery();
                     if (a == 0) { LogAction("Gagal Menyimpan Data"); }
                     else { LogAction("Berhasil Menyimpan Data"); Console.ReadLine(); }
@@ -318,6 +326,62 @@ namespace ProjectPlat_Otw
             }
             LogAction("Data Telah Ditraining");
             con.Close();
+        }
+
+        private void btnKlasifikasi_Click_1(object sender, EventArgs e)
+        {
+            con.Open();
+            double ED;
+            List<string> cls = new List<string>();
+            List<double> sort = new List<double>();
+
+            // Ambil data bobot
+            string sqli = "SELECT * FROM PlatW";
+            OleDbCommand get1 = new OleDbCommand(sqli, con);
+            OleDbDataReader rows = get1.ExecuteReader();
+
+            List<string> arrayKelasBobot = new List<string>();
+            double[][] arrayEkstraksiBobot = new double[1000][];
+
+            int q = 0;
+            while (rows.Read())
+            {
+                arrayKelasBobot.Add(rows[1].ToString());
+
+                arrayEkstraksiBobot[q] = new double[rows[3].ToString().Length];
+                arrayEkstraksiBobot[q] = rows[3].ToString().Split(' ').Select(Double.Parse).ToArray(); ;
+                
+                q++;
+            }
+            
+            
+
+            for (int i = 0; i < arrayBlobs.Count; i++)
+            {
+                string[] str = arrayBlobs[i].Select(x => new string(x, 1)).ToArray();
+                
+                for (int j = 0; j < arrayEkstraksiBobot.Length; j++)
+                {
+                    if (arrayEkstraksiBobot[j]==null) { break; }
+
+                    double totalBobot1 = 0;
+
+                    for (int k = 0; k < str.Length; k++)
+                    {
+                        totalBobot1 = totalBobot1 + Math.Pow((double.Parse(str[k]) - arrayEkstraksiBobot[j][k]), 2);
+                    }
+                    ED = Math.Sqrt(totalBobot1);
+                    sort.Add(ED);
+                }
+                
+                List<double> res = sort.OrderBy(o => o).ToList();
+                
+                txtHasil.AppendText(arrayKelasBobot.ElementAt(sort.IndexOf(res[0])));
+                sort.Clear();
+            }
+
+
+
         }
 
         private void BlobSquare()
@@ -374,11 +438,6 @@ namespace ProjectPlat_Otw
                 LogAction("Detected " + blobs.Length + " blobs present.");
                 //pbOtsu.Image = image;
             }
-        }
-
-        private void btnKlasifikasi_Click(object sender, EventArgs e)
-        {
-            // Klasifikasi // Testing
         }
         
         //membalik warna
@@ -476,10 +535,10 @@ namespace ProjectPlat_Otw
                         Size = new Size(20, 20),
                         Location = new System.Drawing.Point(x, 180),
                         Image = cropi,
-
                     };
                     this.Controls.Add(picture);
-                    arrayBlobs.Add(string.Join("",array1D(cropi)));
+                    arrayBlobs.Add(string.Join("", array1D(cropi)));
+                    //Console.WriteLine(imgChain);
 
                     var txt = new TextBox
                     {
@@ -523,7 +582,156 @@ namespace ProjectPlat_Otw
                 pbChara.Image = originalImage;
             }
         }
+        private void FindLicensePlate(
+         VectorOfVectorOfPoint contours, int[,] hierachy, int idx, IInputArray gray, IInputArray canny,
+         List<IInputOutputArray> licensePlateImagesList, List<IInputOutputArray> filteredLicensePlateImagesList, List<RotatedRect> detectedLicensePlateRegionList,
+         List<String> licenses)
+        {
+            for (; idx >= 0; idx = hierachy[idx, 0])
+            {
+                int numberOfChildren = GetNumberOfChildren(hierachy, idx);
+                //if it does not contains any children (charactor), it is not a license plate region
+                if (numberOfChildren == 0) continue;
 
+                using (VectorOfPoint contour = contours[idx])
+                {
+                    if (CvInvoke.ContourArea(contour) > 400)
+                    {
+                        if (numberOfChildren < 3)
+                        {
+                            //If the contour has less than 3 children, it is not a license plate (assuming license plate has at least 3 charactor)
+                            //However we should search the children of this contour to see if any of them is a license plate
+                            FindLicensePlate(contours, hierachy, hierachy[idx, 2], gray, canny, licensePlateImagesList,
+                               filteredLicensePlateImagesList, detectedLicensePlateRegionList, licenses);
+                            continue;
+                        }
+
+                        RotatedRect box = CvInvoke.MinAreaRect(contour);
+                        if (box.Angle < -45.0)
+                        {
+                            float tmp = box.Size.Width;
+                            box.Size.Width = box.Size.Height;
+                            box.Size.Height = tmp;
+                            box.Angle += 90.0f;
+                        }
+                        else if (box.Angle > 45.0)
+                        {
+                            float tmp = box.Size.Width;
+                            box.Size.Width = box.Size.Height;
+                            box.Size.Height = tmp;
+                            box.Angle -= 90.0f;
+                        }
+
+                        double whRatio = (double)box.Size.Width / box.Size.Height;
+                        if (!(3.0 < whRatio && whRatio < 10.0))
+                        //if (!(1.0 < whRatio && whRatio < 2.0))
+                        {
+                            //if the width height ratio is not in the specific range,it is not a license plate 
+                            //However we should search the children of this contour to see if any of them is a license plate
+                            //Contour<Point> child = contours.VNext;
+                            if (hierachy[idx, 2] > 0)
+                                FindLicensePlate(contours, hierachy, hierachy[idx, 2], gray, canny, licensePlateImagesList,
+                                   filteredLicensePlateImagesList, detectedLicensePlateRegionList, licenses);
+                            continue;
+                        }
+
+                        using (UMat tmp1 = new UMat())
+                        using (UMat tmp2 = new UMat())
+                        {
+                            PointF[] srcCorners = box.GetVertices();
+
+                            PointF[] destCorners = new PointF[] {
+                        new PointF(0, box.Size.Height - 1),
+                        new PointF(0, 0),
+                        new PointF(box.Size.Width - 1, 0),
+                        new PointF(box.Size.Width - 1, box.Size.Height - 1)};
+
+                            using (Mat rot = CameraCalibration.GetAffineTransform(srcCorners, destCorners))
+                            {
+                                CvInvoke.WarpAffine(gray, tmp1, rot, Size.Round(box.Size));
+                            }
+
+                            //resize the license plate such that the front is ~ 10-12. This size of front results in better accuracy from tesseract
+                            Size approxSize = new Size(240, 180);
+                            double scale = Math.Min(approxSize.Width / box.Size.Width, approxSize.Height / box.Size.Height);
+                            Size newSize = new Size((int)Math.Round(box.Size.Width * scale), (int)Math.Round(box.Size.Height * scale));
+                            CvInvoke.Resize(tmp1, tmp2, newSize, 0, 0, Inter.Cubic);
+
+                            //removes some pixels from the edge
+                            int edgePixelSize = 2;
+                            Rectangle newRoi = new Rectangle(new Point(edgePixelSize, edgePixelSize),
+                               tmp2.Size - new Size(2 * edgePixelSize, 2 * edgePixelSize));
+                            UMat plate = new UMat(tmp2, newRoi);
+
+                            UMat filteredPlate = FilterPlate(plate);
+
+                            Tesseract.Character[] words;
+                            StringBuilder strBuilder = new StringBuilder();
+                            using (UMat tmp = filteredPlate.Clone())
+                            {
+                                _ocr.Recognize(tmp);
+                                words = _ocr.GetCharacters();
+
+                                if (words.Length == 0) continue;
+
+                                for (int i = 0; i < words.Length; i++)
+                                {
+                                    strBuilder.Append(words[i].Text);
+                                }
+                            }
+
+                            licenses.Add(strBuilder.ToString());
+                            licensePlateImagesList.Add(plate);
+                            filteredLicensePlateImagesList.Add(filteredPlate);
+                            detectedLicensePlateRegionList.Add(box);
+
+                        }
+                    }
+                }
+            }
+        }
+        private static UMat FilterPlate(UMat plate)
+        {
+            UMat thresh = new UMat();
+            CvInvoke.Threshold(plate, thresh, 120, 255, ThresholdType.BinaryInv);
+            //Image<Gray, Byte> thresh = plate.ThresholdBinaryInv(new Gray(120), new Gray(255));
+
+            Size plateSize = plate.Size;
+            using (Mat plateMask = new Mat(plateSize.Height, plateSize.Width, DepthType.Cv8U, 1))
+            using (Mat plateCanny = new Mat())
+            using (VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint())
+            {
+                plateMask.SetTo(new MCvScalar(255.0));
+                CvInvoke.Canny(plate, plateCanny, 100, 50);
+                CvInvoke.FindContours(plateCanny, contours, null, RetrType.External, ChainApproxMethod.ChainApproxSimple);
+
+                int count = contours.Size;
+                for (int i = 1; i < count; i++)
+                {
+                    using (VectorOfPoint contour = contours[i])
+                    {
+
+                        Rectangle rect = CvInvoke.BoundingRectangle(contour);
+                        if (rect.Height > (plateSize.Height >> 1))
+                        {
+                            rect.X -= 1; rect.Y -= 1; rect.Width += 2; rect.Height += 2;
+                            Rectangle roi = new Rectangle(Point.Empty, plate.Size);
+                            rect.Intersect(roi);
+                            CvInvoke.Rectangle(plateMask, rect, new MCvScalar(), -1);
+                            //plateMask.Draw(rect, new Gray(0.0), -1);
+                        }
+                    }
+
+                }
+
+                thresh.SetTo(new MCvScalar(), plateMask);
+            }
+
+            CvInvoke.Erode(thresh, thresh, null, new Point(-1, -1), 1, BorderType.Constant, CvInvoke.MorphologyDefaultBorderValue);
+            CvInvoke.Dilate(thresh, thresh, null, new Point(-1, -1), 1, BorderType.Constant, CvInvoke.MorphologyDefaultBorderValue);
+
+            return thresh;
+        }
         private Bitmap resizing(Bitmap bitmap)
         {
             graphics.DrawImage(bitmap, destRect, 0, 0, bitmap.Width, bitmap.Height, GraphicsUnit.Pixel, imageAttributes);
@@ -575,23 +783,223 @@ namespace ProjectPlat_Otw
             return sequenceCodeList.ToArray();
         }
 
+        private string ChainCode(Bitmap bit)
+        {
+            str = "";
+            //size = 10; // set size	
+
+            //w = size;
+            //h = size;
+
+            //copy = new Bitmap(bit);
+            //newrect = new Rectangle(0, 0, w, h);
+            //newimg = new Bitmap(w, h);
+
+            //newimg.SetResolution(copy.HorizontalResolution, copy.VerticalResolution);
+
+            //graphics = Graphics.FromImage(newimg);
+            //graphics.CompositingMode = CompositingMode.SourceCopy;
+            //graphics.CompositingQuality = CompositingQuality.HighQuality;
+            //graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            //graphics.SmoothingMode = SmoothingMode.HighQuality;
+            //graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+            //ImageAttributes wrapMode = new ImageAttributes();
+            //wrapMode.SetWrapMode(WrapMode.TileFlipXY);
+            //graphics.DrawImage(copy, newrect, 0, 0, copy.Width, copy.Height, GraphicsUnit.Pixel, wrapMode);
+
+            Color c0, c1, c2, c3, c4, c5, c6, c7;
+            int jr, r0, r1, r2, r3, r4, r5, r6, r7;
+
+            for (int x = 0; x < bit.Width; x++)
+            {
+                if (x == 0 || (x > 1 && x % 2 == 0))
+                {
+                    for (int y = bit.Height - 1; y >= 0; y--)
+                    {
+                        Color clr = bit.GetPixel(x, y);
+                        if (x < bit.Width - 1)
+                        {
+                            c0 = bit.GetPixel(x + 1, y);
+                            r0 = (c0.R + c0.G + c0.B) / 3;
+                            if (r0 > 127) { r0 = 0; }
+                            else { r0 = 1; }
+                        }
+                        else { r0 = 0; }
+
+                        if (x < bit.Width - 1 && y > 0)
+                        {
+                            c1 = bit.GetPixel(x + 1, y - 1);
+                            r1 = (c1.R + c1.G + c1.B) / 3;
+                            if (r1 > 127) { r1 = 0; }
+                            else { r1 = 1; }
+                        }
+                        else { r1 = 0; }
+
+                        if (y > 0)
+                        {
+                            c2 = bit.GetPixel(x, y - 1);
+                            r2 = (c2.R + c2.G + c2.B) / 3;
+                            if (r2 > 127) { r2 = 0; }
+                            else { r2 = 1; }
+                        }
+                        else { r2 = 0; }
+
+                        if (x > 0 && y > 0)
+                        {
+                            c3 = bit.GetPixel(x - 1, y - 1);
+                            r3 = (c3.R + c3.G + c3.B) / 3;
+                            if (r3 > 127) { r3 = 0; }
+                            else { r3 = 1; }
+                        }
+                        else { r3 = 0; }
+
+                        if (x > 0)
+                        {
+                            c4 = bit.GetPixel(x - 1, y);
+                            r4 = (c4.R + c4.G + c4.B) / 3;
+                            if (r4 > 127) { r4 = 0; }
+                            else { r4 = 1; }
+                        }
+                        else { r4 = 0; }
+
+                        if (x > 0 && y < bit.Height - 1)
+                        {
+                            c5 = bit.GetPixel(x - 1, y + 1);
+                            r5 = (c5.R + c5.G + c5.B) / 3;
+                            if (r5 > 127) { r5 = 0; }
+                            else { r5 = 1; }
+                        }
+                        else { r5 = 0; }
+
+                        if (y < bit.Height - 1)
+                        {
+                            c6 = bit.GetPixel(x, y + 1);
+                            r6 = (c6.R + c6.G + c6.B) / 3;
+                            if (r6 > 127) { r6 = 0; }
+                            else { r6 = 1; }
+                        }
+                        else { r6 = 0; }
+
+                        if (x < bit.Width - 1 && y < bit.Height - 1)
+                        {
+                            c7 = bit.GetPixel(x + 1, y + 1);
+                            r7 = (c7.R + c7.G + c7.B) / 3;
+                            if (r7 > 127) { r7 = 0; }
+                            else { r7 = 1; }
+                        }
+                        else { r7 = 0; }
+
+                        jr = r0 + r1 + r2 + r3 + r4 + r5 + r6 + r7;
+                        str = str + jr.ToString();
+                    }
+                }
+                else if (x == 1 || (x > 1 && x % 2 == 1))
+                {
+                    for (int y = 0; y < bit.Height; y++)
+                    {
+                        Color clr = bit.GetPixel(x, y);
+                        if (x < bit.Width - 1)
+                        {
+                            c0 = bit.GetPixel(x + 1, y);
+                            r0 = (c0.R + c0.G + c0.B) / 3;
+                            if (r0 > 127) { r0 = 0; }
+                            else { r0 = 1; }
+                        }
+                        else { r0 = 0; }
+
+                        if (x < bit.Width - 1 && y > 0)
+                        {
+                            c1 = bit.GetPixel(x + 1, y - 1);
+                            r1 = (c1.R + c1.G + c1.B) / 3;
+                            if (r1 > 127) { r1 = 0; }
+                            else { r1 = 1; }
+                        }
+                        else { r1 = 0; }
+
+                        if (y > 0)
+                        {
+                            c2 = bit.GetPixel(x, y - 1);
+                            r2 = (c2.R + c2.G + c2.B) / 3;
+                            if (r2 > 127) { r2 = 0; }
+                            else { r2 = 1; }
+                        }
+                        else { r2 = 0; }
+
+                        if (x > 0 && y > 0)
+                        {
+                            c3 = bit.GetPixel(x - 1, y - 1);
+                            r3 = (c3.R + c3.G + c3.B) / 3;
+                            if (r3 > 127) { r3 = 0; }
+                            else { r3 = 1; }
+                        }
+                        else { r3 = 0; }
+
+                        if (x > 0)
+                        {
+                            c4 = bit.GetPixel(x - 1, y);
+                            r4 = (c4.R + c4.G + c4.B) / 3;
+                            if (r4 > 127) { r4 = 0; }
+                            else { r4 = 1; }
+                        }
+                        else { r4 = 0; }
+
+                        if (x > 0 && y < bit.Height - 1)
+                        {
+                            c5 = bit.GetPixel(x - 1, y + 1);
+                            r5 = (c5.R + c5.G + c5.B) / 3;
+                            if (r5 > 127) { r5 = 0; }
+                            else { r5 = 1; }
+                        }
+                        else { r5 = 0; }
+
+                        if (y < bit.Height - 1)
+                        {
+                            c6 = bit.GetPixel(x, y + 1);
+                            r6 = (c6.R + c6.G + c6.B) / 3;
+                            if (r6 > 127) { r6 = 0; }
+                            else { r6 = 1; }
+                        }
+                        else { r6 = 0; }
+
+                        if (x < bit.Width - 1 && y < bit.Height - 1)
+                        {
+                            c7 = bit.GetPixel(x + 1, y + 1);
+                            r7 = (c7.R + c7.G + c7.B) / 3;
+                            if (r7 > 127) { r7 = 0; }
+                            else { r7 = 1; }
+                        }
+                        else { r7 = 0; }
+
+                        jr = r0 + r1 + r2 + r3 + r4 + r5 + r6 + r7;
+                        str = str + jr.ToString();
+                    }
+                }
+            }
+
+            return str;
+        }
+
         private double[] elveki(double[] bobot1, double[] bobot2, double[] data, double alpha)
         {
             double totalBobot1 = 0;
             double totalBobot2 = 0;
-            
+
             for (int i = 0; i < bobot1.Length; i++)
             {
                 totalBobot1 = totalBobot1 + Math.Pow((data[i] - bobot1[i]), 2);
                 totalBobot2 = totalBobot2 + Math.Pow((data[i] - bobot2[i]), 2);
             }
-
+            
             double[] outputBobot = new double[bobot1.Length];
 
             if (Math.Min(totalBobot1, totalBobot2) == totalBobot1)
             {
                 for (int i = 0; i < bobot1.Length; i++)
-                { outputBobot[i] = bobot1[i] + (alpha * (data[i] - bobot1[i])); }
+                {
+                    outputBobot[i] = bobot1[i] + (alpha * (data[i] - bobot1[i]));
+                    //Console.WriteLine(outputBobot[i] + " " + bobot1[i] + " " + alpha + " " + data[i] + " " + bobot1[i]);
+                }
             }
             else
             {

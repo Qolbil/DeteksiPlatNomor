@@ -67,8 +67,8 @@
             this.sAveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.txtDataset = new System.Windows.Forms.TextBox();
             this.btnTraining = new System.Windows.Forms.Button();
-            this.button4 = new System.Windows.Forms.Button();
-            this.button5 = new System.Windows.Forms.Button();
+            this.btnKlasifikasi = new System.Windows.Forms.Button();
+            this.txtHasil = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.pbGrey)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbInput)).BeginInit();
             this.statusStrip1.SuspendLayout();
@@ -434,31 +434,30 @@
             this.btnTraining.UseVisualStyleBackColor = true;
             this.btnTraining.Click += new System.EventHandler(this.btnTraining_Click);
             // 
-            // button4
+            // btnKlasifikasi
             // 
-            this.button4.Location = new System.Drawing.Point(334, 309);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(75, 23);
-            this.button4.TabIndex = 38;
-            this.button4.Text = "Klasifikasi";
-            this.button4.UseVisualStyleBackColor = true;
+            this.btnKlasifikasi.Location = new System.Drawing.Point(334, 309);
+            this.btnKlasifikasi.Name = "btnKlasifikasi";
+            this.btnKlasifikasi.Size = new System.Drawing.Size(75, 23);
+            this.btnKlasifikasi.TabIndex = 39;
+            this.btnKlasifikasi.Text = "Klasifikasi";
+            this.btnKlasifikasi.UseVisualStyleBackColor = true;
+            this.btnKlasifikasi.Click += new System.EventHandler(this.btnKlasifikasi_Click_1);
             // 
-            // button5
+            // txtHasil
             // 
-            this.button5.Location = new System.Drawing.Point(334, 338);
-            this.button5.Name = "button5";
-            this.button5.Size = new System.Drawing.Size(75, 23);
-            this.button5.TabIndex = 39;
-            this.button5.Text = "button5";
-            this.button5.UseVisualStyleBackColor = true;
+            this.txtHasil.Location = new System.Drawing.Point(338, 340);
+            this.txtHasil.Name = "txtHasil";
+            this.txtHasil.Size = new System.Drawing.Size(133, 20);
+            this.txtHasil.TabIndex = 40;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(759, 391);
-            this.Controls.Add(this.button5);
-            this.Controls.Add(this.button4);
+            this.Controls.Add(this.txtHasil);
+            this.Controls.Add(this.btnKlasifikasi);
             this.Controls.Add(this.btnTraining);
             this.Controls.Add(this.txtDataset);
             this.Controls.Add(this.saveTraining);
@@ -539,8 +538,8 @@
         private System.Windows.Forms.ToolStripMenuItem sAveToolStripMenuItem;
         private System.Windows.Forms.TextBox txtDataset;
         private System.Windows.Forms.Button btnTraining;
-        private System.Windows.Forms.Button button4;
-        private System.Windows.Forms.Button button5;
+        private System.Windows.Forms.Button btnKlasifikasi;
+        private System.Windows.Forms.TextBox txtHasil;
     }
 }
 
