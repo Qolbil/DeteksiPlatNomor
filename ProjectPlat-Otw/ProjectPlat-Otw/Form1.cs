@@ -20,6 +20,7 @@ using AForge.Imaging;
 using AForge.Imaging.Filters;
 using System.Text.RegularExpressions;
 using Emgu.CV.CvEnum;
+using Emgu.CV.Util;
 
 namespace ProjectPlat_Otw
 {
@@ -582,156 +583,157 @@ namespace ProjectPlat_Otw
                 pbChara.Image = originalImage;
             }
         }
-        private void FindLicensePlate(
-         VectorOfVectorOfPoint contours, int[,] hierachy, int idx, IInputArray gray, IInputArray canny,
-         List<IInputOutputArray> licensePlateImagesList, List<IInputOutputArray> filteredLicensePlateImagesList, List<RotatedRect> detectedLicensePlateRegionList,
-         List<String> licenses)
-        {
-            for (; idx >= 0; idx = hierachy[idx, 0])
-            {
-                int numberOfChildren = GetNumberOfChildren(hierachy, idx);
-                //if it does not contains any children (charactor), it is not a license plate region
-                if (numberOfChildren == 0) continue;
 
-                using (VectorOfPoint contour = contours[idx])
-                {
-                    if (CvInvoke.ContourArea(contour) > 400)
-                    {
-                        if (numberOfChildren < 3)
-                        {
-                            //If the contour has less than 3 children, it is not a license plate (assuming license plate has at least 3 charactor)
-                            //However we should search the children of this contour to see if any of them is a license plate
-                            FindLicensePlate(contours, hierachy, hierachy[idx, 2], gray, canny, licensePlateImagesList,
-                               filteredLicensePlateImagesList, detectedLicensePlateRegionList, licenses);
-                            continue;
-                        }
+        //private void FindLicensePlate(
+        // VectorOfVectorOfPoint contours, int[,] hierachy, int idx, IInputArray gray, IInputArray canny,
+        // List<IInputOutputArray> licensePlateImagesList, List<IInputOutputArray> filteredLicensePlateImagesList, List<RotatedRect> detectedLicensePlateRegionList,
+        // List<String> licenses)
+        //{
+        //    for (; idx >= 0; idx = hierachy[idx, 0])
+        //    {
+        //        int numberOfChildren = GetNumberOfChildren(hierachy, idx);
+        //        //if it does not contains any children (charactor), it is not a license plate region
+        //        if (numberOfChildren == 0) continue;
 
-                        RotatedRect box = CvInvoke.MinAreaRect(contour);
-                        if (box.Angle < -45.0)
-                        {
-                            float tmp = box.Size.Width;
-                            box.Size.Width = box.Size.Height;
-                            box.Size.Height = tmp;
-                            box.Angle += 90.0f;
-                        }
-                        else if (box.Angle > 45.0)
-                        {
-                            float tmp = box.Size.Width;
-                            box.Size.Width = box.Size.Height;
-                            box.Size.Height = tmp;
-                            box.Angle -= 90.0f;
-                        }
+        //        using (VectorOfPoint contour = contours[idx])
+        //        {
+        //            if (CvInvoke.ContourArea(contour) > 400)
+        //            {
+        //                if (numberOfChildren < 3)
+        //                {
+        //                    //If the contour has less than 3 children, it is not a license plate (assuming license plate has at least 3 charactor)
+        //                    //However we should search the children of this contour to see if any of them is a license plate
+        //                    FindLicensePlate(contours, hierachy, hierachy[idx, 2], gray, canny, licensePlateImagesList,
+        //                       filteredLicensePlateImagesList, detectedLicensePlateRegionList, licenses);
+        //                    continue;
+        //                }
 
-                        double whRatio = (double)box.Size.Width / box.Size.Height;
-                        if (!(3.0 < whRatio && whRatio < 10.0))
-                        //if (!(1.0 < whRatio && whRatio < 2.0))
-                        {
-                            //if the width height ratio is not in the specific range,it is not a license plate 
-                            //However we should search the children of this contour to see if any of them is a license plate
-                            //Contour<Point> child = contours.VNext;
-                            if (hierachy[idx, 2] > 0)
-                                FindLicensePlate(contours, hierachy, hierachy[idx, 2], gray, canny, licensePlateImagesList,
-                                   filteredLicensePlateImagesList, detectedLicensePlateRegionList, licenses);
-                            continue;
-                        }
+        //                RotatedRect box = CvInvoke.MinAreaRect(contour);
+        //                if (box.Angle < -45.0)
+        //                {
+        //                    float tmp = box.Size.Width;
+        //                    box.Size.Width = box.Size.Height;
+        //                    box.Size.Height = tmp;
+        //                    box.Angle += 90.0f;
+        //                }
+        //                else if (box.Angle > 45.0)
+        //                {
+        //                    float tmp = box.Size.Width;
+        //                    box.Size.Width = box.Size.Height;
+        //                    box.Size.Height = tmp;
+        //                    box.Angle -= 90.0f;
+        //                }
 
-                        using (UMat tmp1 = new UMat())
-                        using (UMat tmp2 = new UMat())
-                        {
-                            PointF[] srcCorners = box.GetVertices();
+        //                double whRatio = (double)box.Size.Width / box.Size.Height;
+        //                if (!(3.0 < whRatio && whRatio < 10.0))
+        //                //if (!(1.0 < whRatio && whRatio < 2.0))
+        //                {
+        //                    //if the width height ratio is not in the specific range,it is not a license plate 
+        //                    //However we should search the children of this contour to see if any of them is a license plate
+        //                    //Contour<Point> child = contours.VNext;
+        //                    if (hierachy[idx, 2] > 0)
+        //                        FindLicensePlate(contours, hierachy, hierachy[idx, 2], gray, canny, licensePlateImagesList,
+        //                           filteredLicensePlateImagesList, detectedLicensePlateRegionList, licenses);
+        //                    continue;
+        //                }
 
-                            PointF[] destCorners = new PointF[] {
-                        new PointF(0, box.Size.Height - 1),
-                        new PointF(0, 0),
-                        new PointF(box.Size.Width - 1, 0),
-                        new PointF(box.Size.Width - 1, box.Size.Height - 1)};
+        //                using (UMat tmp1 = new UMat())
+        //                using (UMat tmp2 = new UMat())
+        //                {
+        //                    PointF[] srcCorners = box.GetVertices();
 
-                            using (Mat rot = CameraCalibration.GetAffineTransform(srcCorners, destCorners))
-                            {
-                                CvInvoke.WarpAffine(gray, tmp1, rot, Size.Round(box.Size));
-                            }
+        //                    PointF[] destCorners = new PointF[] {
+        //                new PointF(0, box.Size.Height - 1),
+        //                new PointF(0, 0),
+        //                new PointF(box.Size.Width - 1, 0),
+        //                new PointF(box.Size.Width - 1, box.Size.Height - 1)};
 
-                            //resize the license plate such that the front is ~ 10-12. This size of front results in better accuracy from tesseract
-                            Size approxSize = new Size(240, 180);
-                            double scale = Math.Min(approxSize.Width / box.Size.Width, approxSize.Height / box.Size.Height);
-                            Size newSize = new Size((int)Math.Round(box.Size.Width * scale), (int)Math.Round(box.Size.Height * scale));
-                            CvInvoke.Resize(tmp1, tmp2, newSize, 0, 0, Inter.Cubic);
+        //                    using (Mat rot = CameraCalibration.GetAffineTransform(srcCorners, destCorners))
+        //                    {
+        //                        CvInvoke.WarpAffine(gray, tmp1, rot, Size.Round(box.Size));
+        //                    }
 
-                            //removes some pixels from the edge
-                            int edgePixelSize = 2;
-                            Rectangle newRoi = new Rectangle(new Point(edgePixelSize, edgePixelSize),
-                               tmp2.Size - new Size(2 * edgePixelSize, 2 * edgePixelSize));
-                            UMat plate = new UMat(tmp2, newRoi);
+        //                    //resize the license plate such that the front is ~ 10-12. This size of front results in better accuracy from tesseract
+        //                    Size approxSize = new Size(240, 180);
+        //                    double scale = Math.Min(approxSize.Width / box.Size.Width, approxSize.Height / box.Size.Height);
+        //                    Size newSize = new Size((int)Math.Round(box.Size.Width * scale), (int)Math.Round(box.Size.Height * scale));
+        //                    CvInvoke.Resize(tmp1, tmp2, newSize, 0, 0, Inter.Cubic);
 
-                            UMat filteredPlate = FilterPlate(plate);
+        //                    //removes some pixels from the edge
+        //                    int edgePixelSize = 2;
+        //                    Rectangle newRoi = new Rectangle(new Point(edgePixelSize, edgePixelSize),
+        //                       tmp2.Size - new Size(2 * edgePixelSize, 2 * edgePixelSize));
+        //                    UMat plate = new UMat(tmp2, newRoi);
 
-                            Tesseract.Character[] words;
-                            StringBuilder strBuilder = new StringBuilder();
-                            using (UMat tmp = filteredPlate.Clone())
-                            {
-                                _ocr.Recognize(tmp);
-                                words = _ocr.GetCharacters();
+        //                    UMat filteredPlate = FilterPlate(plate);
 
-                                if (words.Length == 0) continue;
+        //                    Tesseract.Character[] words;
+        //                    StringBuilder strBuilder = new StringBuilder();
+        //                    using (UMat tmp = filteredPlate.Clone())
+        //                    {
+        //                        _ocr.Recognize(tmp);
+        //                        words = _ocr.GetCharacters();
 
-                                for (int i = 0; i < words.Length; i++)
-                                {
-                                    strBuilder.Append(words[i].Text);
-                                }
-                            }
+        //                        if (words.Length == 0) continue;
 
-                            licenses.Add(strBuilder.ToString());
-                            licensePlateImagesList.Add(plate);
-                            filteredLicensePlateImagesList.Add(filteredPlate);
-                            detectedLicensePlateRegionList.Add(box);
+        //                        for (int i = 0; i < words.Length; i++)
+        //                        {
+        //                            strBuilder.Append(words[i].Text);
+        //                        }
+        //                    }
 
-                        }
-                    }
-                }
-            }
-        }
-        private static UMat FilterPlate(UMat plate)
-        {
-            UMat thresh = new UMat();
-            CvInvoke.Threshold(plate, thresh, 120, 255, ThresholdType.BinaryInv);
-            //Image<Gray, Byte> thresh = plate.ThresholdBinaryInv(new Gray(120), new Gray(255));
+        //                    licenses.Add(strBuilder.ToString());
+        //                    licensePlateImagesList.Add(plate);
+        //                    filteredLicensePlateImagesList.Add(filteredPlate);
+        //                    detectedLicensePlateRegionList.Add(box);
 
-            Size plateSize = plate.Size;
-            using (Mat plateMask = new Mat(plateSize.Height, plateSize.Width, DepthType.Cv8U, 1))
-            using (Mat plateCanny = new Mat())
-            using (VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint())
-            {
-                plateMask.SetTo(new MCvScalar(255.0));
-                CvInvoke.Canny(plate, plateCanny, 100, 50);
-                CvInvoke.FindContours(plateCanny, contours, null, RetrType.External, ChainApproxMethod.ChainApproxSimple);
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
+        //private static UMat FilterPlate(UMat plate)
+        //{
+        //    UMat thresh = new UMat();
+        //    CvInvoke.Threshold(plate, thresh, 120, 255, ThresholdType.BinaryInv);
+        //    //Image<Gray, Byte> thresh = plate.ThresholdBinaryInv(new Gray(120), new Gray(255));
 
-                int count = contours.Size;
-                for (int i = 1; i < count; i++)
-                {
-                    using (VectorOfPoint contour = contours[i])
-                    {
+        //    Size plateSize = plate.Size;
+        //    using (Mat plateMask = new Mat(plateSize.Height, plateSize.Width, DepthType.Cv8U, 1))
+        //    using (Mat plateCanny = new Mat())
+        //    using (VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint())
+        //    {
+        //        plateMask.SetTo(new MCvScalar(255.0));
+        //        CvInvoke.Canny(plate, plateCanny, 100, 50);
+        //        CvInvoke.FindContours(plateCanny, contours, null, RetrType.External, ChainApproxMethod.ChainApproxSimple);
 
-                        Rectangle rect = CvInvoke.BoundingRectangle(contour);
-                        if (rect.Height > (plateSize.Height >> 1))
-                        {
-                            rect.X -= 1; rect.Y -= 1; rect.Width += 2; rect.Height += 2;
-                            Rectangle roi = new Rectangle(Point.Empty, plate.Size);
-                            rect.Intersect(roi);
-                            CvInvoke.Rectangle(plateMask, rect, new MCvScalar(), -1);
-                            //plateMask.Draw(rect, new Gray(0.0), -1);
-                        }
-                    }
+        //        int count = contours.Size;
+        //        for (int i = 1; i < count; i++)
+        //        {
+        //            using (VectorOfPoint contour = contours[i])
+        //            {
 
-                }
+        //                Rectangle rect = CvInvoke.BoundingRectangle(contour);
+        //                if (rect.Height > (plateSize.Height >> 1))
+        //                {
+        //                    rect.X -= 1; rect.Y -= 1; rect.Width += 2; rect.Height += 2;
+        //                    Rectangle roi = new Rectangle(Point.Empty, plate.Size);
+        //                    rect.Intersect(roi);
+        //                    CvInvoke.Rectangle(plateMask, rect, new MCvScalar(), -1);
+        //                    //plateMask.Draw(rect, new Gray(0.0), -1);
+        //                }
+        //            }
 
-                thresh.SetTo(new MCvScalar(), plateMask);
-            }
+        //        }
 
-            CvInvoke.Erode(thresh, thresh, null, new Point(-1, -1), 1, BorderType.Constant, CvInvoke.MorphologyDefaultBorderValue);
-            CvInvoke.Dilate(thresh, thresh, null, new Point(-1, -1), 1, BorderType.Constant, CvInvoke.MorphologyDefaultBorderValue);
+        //        thresh.SetTo(new MCvScalar(), plateMask);
+        //    }
 
-            return thresh;
-        }
+        //    CvInvoke.Erode(thresh, thresh, null, new Point(-1, -1), 1, BorderType.Constant, CvInvoke.MorphologyDefaultBorderValue);
+        //    CvInvoke.Dilate(thresh, thresh, null, new Point(-1, -1), 1, BorderType.Constant, CvInvoke.MorphologyDefaultBorderValue);
+
+        //    return thresh;
+        //}
         private Bitmap resizing(Bitmap bitmap)
         {
             graphics.DrawImage(bitmap, destRect, 0, 0, bitmap.Width, bitmap.Height, GraphicsUnit.Pixel, imageAttributes);
